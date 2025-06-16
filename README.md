@@ -39,9 +39,12 @@ c. 在新建的 `.env` 文件中，添加你的 API 密钥，格式如下：
 
    ```
    ARK_API_KEY="YOUR_API_KEY_HERE"
+
+   # 例如
+   ARK_API_KEY="abcdabcd_abcd_1111"
    ```
 
-d. **（重要！）** 为了防止密钥泄露，请务必在 `.gitignore` 文件中添加 `.env` (或 `api_env.env`)，确保该文件不会被上传到 Git 仓库。
+d. **（重要！）** 为了防止密钥泄露，请务必在 `.gitignore` 文件中将您的密钥文件添加进去，确保该文件不会被上传到 Git 仓库。
 
 #### 4. 启动后端服务
 
