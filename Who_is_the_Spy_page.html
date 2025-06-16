@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>谁是卧底 - AI对战 (动态淘汰版)</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
+        }
+        .btn {
+            @apply font-bold py-2 px-6 rounded-lg shadow-md hover:shadow-lg transition-all duration-300 transform hover:-translate-y-0.5 focus:outline-none focus:ring-2 focus:ring-offset-2;
+        }
+        .btn-primary {
+            @apply bg-blue-600 text-white hover:bg-blue-700 focus:ring-blue-500;
+        }
+        .player-card {
+            @apply bg-white rounded-xl shadow-lg p-5 border-2 border-transparent transition-all duration-500;
+        }
+        .player-card.eliminated {
+            @apply bg-gray-200 opacity-50 border-gray-400;
+            transform: scale(0.95);
+        }
+        .player-card.undercover {
+            @apply border-red-500 bg-red-50;
+        }
+        .player-card.civilian {
+            @apply border-green-500 bg-green-50;
+        }
+        .animate-fade-in {
+            animation: fadeIn 0.5s ease-in-out;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .discussion-bubble {
+            animation: fadeIn 0.5s ease-in-out;
+        }
+        /* 恢复深度思考内容的样式 */
+        .reasoning-content {
+            @apply bg-gray-200 p-3 mt-2 rounded-lg text-sm text-gray-600 border-l-4 border-gray-400 whitespace-pre-wrap;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 text-gray-800">
+
+    <div class="container mx-auto px-4 py-8 max-w-7xl">
+        <header class="text-center mb-8 animate-fade-in">
+            <h1 class="text-4xl md:text-5xl font-extrabold text-gray-900 mb-2">
+                <i class="fas fa-user-secret mr-3 text-blue-600"></i>谁是卧底 <span class="text-blue-600">(AI对战)</span>
+            </h1>
+            <p class="text-gray-600 text-lg">观察四个AI智能体进行一场动态淘汰的卧底游戏</p>
+        </header>
+
+        <!-- 游戏控制区域 -->
+        <div class="bg-white rounded-xl shadow-lg p-6 mb-8 animate-fade-in" style="animation-delay: 100ms;">
+            <div class="flex flex-col sm:flex-row justify-center items-center space-y-4 sm:space-y-0 sm:space-x-6">
+                <button id="start-game-btn" class="btn btn-primary w-full sm:w-auto text-lg">
+                    <i class="fas fa-play mr-2"></i>开始游戏
+                </button>
+                <!-- 添加上帝视角复选框 -->
+                <div class="flex items-center">
+                    <input type="checkbox" id="god-mode-checkbox" class="h-5 w-5 rounded border-gray-300 text-blue-600 focus:ring-blue-500">
+                    <label for="god-mode-checkbox" class="ml-2 text-md font-medium text-gray-700">开启上帝视角</label>
+                </div>
+            </div>
+        </div>
+
+        <!-- 游戏状态显示 -->
+        <div id="status-display" class="bg-white rounded-xl shadow-md p-4 mb-8 text-center text-xl text-gray-700 font-semibold animate-fade-in hidden" style="animation-delay: 200ms;">
+            <p id="current-phase">等待开始...</p>
+        </div>
+
+        <!-- 玩家信息展示区 -->
+        <div class="mb-8 animate-fade-in" style="animation-delay: 300ms;">
+            <h2 class="text-2xl font-bold text-gray-800 mb-4 flex items-center">
+                <i class="fas fa-users mr-3 text-gray-500"></i>游戏玩家
+            </h2>
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4" id="players-container">
+                <div class="player-card border-gray-200"><div class="h-24 flex items-center justify-center text-gray-400">玩家 1</div></div>
+                <div class="player-card border-gray-200"><div class="h-24 flex items-center justify-center text-gray-400">玩家 2</div></div>
+                <div class="player-card border-gray-200"><div class="h-24 flex items-center justify-center text-gray-400">玩家 3</div></div>
+                <div class="player-card border-gray-200"><div class="h-24 flex items-center justify-center text-gray-400">玩家 4</div></div>
+            </div>
+        </div>
+
+        <!-- 对话展示区 -->
+        <div class="mb-8 animate-fade-in" style="animation-delay: 400ms;">
+            <h2 class="text-2xl font-bold text-gray-800 mb-4 flex items-center">
+                <i class="fas fa-comments mr-3 text-gray-500"></i>讨论与投票
+            </h2>
+            <div class="bg-white rounded-xl shadow-lg p-4 h-[42rem] overflow-y-auto" id="discussion-container">
+                <div class="text-center text-gray-500 pt-16" id="discussion-placeholder">
+                    <i class="fas fa-hourglass-start fa-2x mb-4"></i>
+                    <p>游戏尚未开始...</p>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 结果展示区 -->
+        <div id="result-container" class="mb-8 hidden">
+            <div class="bg-gradient-to-r from-blue-500 to-indigo-600 rounded-xl shadow-2xl p-8 text-center text-white animate-fade-in">
+                <h2 class="text-4xl font-extrabold mb-4" id="result-title"></h2>
+                <p class="text-xl opacity-90" id="result-message"></p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const startGameBtn = document.getElementById('start-game-btn');
+        const godModeCheckbox = document.getElementById('god-mode-checkbox');
+        const playersContainer = document.getElementById('players-container');
+        const discussionContainer = document.getElementById('discussion-container');
+        const discussionPlaceholder = document.getElementById('discussion-placeholder');
+        const currentPhase = document.getElementById('current-phase');
+        const statusDisplay = document.getElementById('status-display');
+        const resultContainer = document.getElementById('result-container');
+        const resultTitle = document.getElementById('result-title');
+        const resultMessage = document.getElementById('result-message');
+        
+        let allPlayersData = [];
+
+        // 恢复深度思考内容的切换功能
+        function toggleReasoning(button) {
+            const reasoningDiv = button.nextElementSibling;
+            const icon = button.querySelector('i');
+            if (reasoningDiv.classList.contains('hidden')) {
+                reasoningDiv.classList.remove('hidden');
+                button.innerHTML = '<i class="fas fa-chevron-up mr-1"></i>隐藏思考过程';
+            } else {
+                reasoningDiv.classList.add('hidden');
+                button.innerHTML = '<i class="fas fa-chevron-down mr-1"></i>查看思考过程';
+            }
+        }
+
+        function renderPlayers(players, showRoles = false) {
+            if (allPlayersData.length === 0) allPlayersData = players;
+            
+            playersContainer.innerHTML = '';
+            allPlayersData.forEach(player => {
+                const card = document.createElement('div');
+                card.id = `player-card-${player.id}`;
+                card.className = 'player-card';
+
+                if (!player.active) {
+                    card.classList.add('eliminated');
+                }
+
+                let roleInfo = '';
+                // 根据传入的参数决定是否显示身份
+                if (showRoles) {
+                    const roleClass = player.isUndercover ? 'text-red-600' : 'text-green-600';
+                    const roleIcon = player.isUndercover ? 'fa-user-secret' : 'fa-user';
+                    card.classList.add(player.isUndercover ? 'undercover' : 'civilian');
+                    
+                    roleInfo = `
+                        <div class="mt-4 pt-4 border-t-2 border-dashed">
+                            <p class="text-md font-semibold ${roleClass}">
+                                <i class="fas ${roleIcon} mr-2"></i>身份: ${player.role}
+                            </p>
+                            <p class="text-md text-gray-700 mt-1">
+                                <i class="fas fa-key mr-2"></i>词语: <span class="font-bold">${player.word}</span>
+                            </p>
+                        </div>
+                    `;
+                }
+
+                card.innerHTML = `
+                    <div class="flex items-center">
+                        <div class="w-12 h-12 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 font-bold text-xl flex-shrink-0">
+                            ${player.id}
+                        </div>
+                        <div class="ml-4">
+                            <h3 class="font-bold text-lg text-gray-900">${player.name}</h3>
+                            <p class="text-sm text-gray-500">${player.active ? '游戏中' : '已出局'}</p>
+                        </div>
+                    </div>
+                    ${roleInfo}
+                `;
+                playersContainer.appendChild(card);
+            });
+        }
+        
+        function addInfoToDiscussion(htmlContent, type) {
+            const wrapper = document.createElement('div');
+            let bgColor = 'bg-gray-200', textColor = 'text-gray-700';
+            if (type === 'elimination') { bgColor = 'bg-red-100'; textColor = 'text-red-800'; }
+            else if (type === 'tie') { bgColor = 'bg-yellow-100'; textColor = 'text-yellow-800'; }
+            else if (type === 'round') { bgColor = 'bg-blue-100'; textColor = 'text-blue-800'; }
+
+            wrapper.className = `text-center my-4 py-2 animate-fade-in`;
+            wrapper.innerHTML = `<span class="${bgColor} ${textColor} font-semibold px-4 py-1 rounded-full text-sm">${htmlContent}</span>`;
+            discussionContainer.appendChild(wrapper);
+            discussionContainer.scrollTop = discussionContainer.scrollHeight;
+        }
+
+        async function handleStartGame() {
+            startGameBtn.disabled = true;
+            startGameBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>游戏进行中...';
+            statusDisplay.classList.remove('hidden');
+            currentPhase.textContent = '正在初始化游戏...';
+            
+            discussionContainer.innerHTML = '';
+            discussionPlaceholder.classList.add('hidden');
+            resultContainer.classList.add('hidden');
+            
+            let currentMessageDiv, currentContentP, currentReasoningDiv;
+
+            try {
+                const response = await fetch('/run_game', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({}) 
+                });
+
+                if (!response.body) throw new Error("流式响应体不存在");
+
+                const reader = response.body.pipeThrough(new TextDecoderStream()).getReader();
+
+                while (true) {
+                    const { value, done } = await reader.read();
+                    if (done) break;
+                    
+                    const lines = value.split('\n\n').filter(line => line.startsWith('data:'));
+                    for (const line of lines) {
+                        if (!line.trim()) continue;
+                        const data = JSON.parse(line.substring(5));
+
+                        switch (data.type) {
+                            case 'start':
+                                allPlayersData = data.players;
+                                // 根据上帝视角复选框的状态来渲染玩家
+                                renderPlayers(allPlayersData, godModeCheckbox.checked); 
+                                currentPhase.textContent = '游戏开始!';
+                                break;
+                            case 'round_start':
+                                currentPhase.textContent = `第 ${data.round} 轮 - 发言阶段`;
+                                addInfoToDiscussion(`--- 第 ${data.round} 轮开始 ---`, 'round');
+                                break;
+                            case 'voting_phase_start':
+                                currentPhase.textContent = `第 ${data.round} 轮 - 投票阶段`;
+                                addInfoToDiscussion(`发言结束，进入投票`, 'vote');
+                                break;
+                            case 'message_start':
+                                currentMessageDiv = document.createElement('div');
+                                currentMessageDiv.className = 'discussion-bubble mb-4 p-4 rounded-lg bg-blue-50';
+                                // 恢复带有深度思考内容的话题气泡结构
+                                currentMessageDiv.innerHTML = `
+                                    <div class="flex items-start">
+                                        <div class="w-10 h-10 rounded-full bg-blue-100 flex-shrink-0 flex items-center justify-center text-blue-600 font-bold mr-4">${data.playerId}</div>
+                                        <div class="flex-grow">
+                                            <span class="font-bold text-blue-700">${data.name}:</span>
+                                            <p class="text-gray-800 text-lg mt-1 whitespace-pre-wrap"></p>
+                                            <button onclick="toggleReasoning(this)" class="hidden text-xs text-blue-600 hover:text-blue-800 mt-2 font-semibold">
+                                                <i class="fas fa-chevron-down mr-1"></i>查看思考过程
+                                            </button>
+                                            <div class="reasoning-content hidden"></div>
+                                        </div>
+                                    </div>`;
+                                discussionContainer.appendChild(currentMessageDiv);
+                                currentContentP = currentMessageDiv.querySelector('p');
+                                currentReasoningDiv = currentMessageDiv.querySelector('.reasoning-content');
+                                break;
+                            case 'message_chunk':
+                                if (currentContentP) currentContentP.textContent += data.content;
+                                discussionContainer.scrollTop = discussionContainer.scrollHeight;
+                                break;
+                            // 添加对 reasoning_chunk 的处理
+                            case 'reasoning_chunk':
+                                if (currentReasoningDiv) {
+                                    currentReasoningDiv.previousElementSibling.classList.remove('hidden'); // 显示按钮
+                                    currentReasoningDiv.textContent += data.reasoning_content;
+                                }
+                                break;
+                            case 'message_end':
+                                currentMessageDiv = null;
+                                currentContentP = null;
+                                currentReasoningDiv = null;
+                                break;
+                            case 'elimination': {
+                                const { eliminated_player_id, eliminated_player_name, votes } = data;
+                                currentPhase.textContent = `玩家 ${eliminated_player_name} 被投票出局！`;
+                                const playerToUpdate = allPlayersData.find(p => p.id === eliminated_player_id);
+                                if(playerToUpdate) playerToUpdate.active = false;
+                                // 根据上帝模式决定是否在淘汰后立刻揭示身份
+                                renderPlayers(allPlayersData, godModeCheckbox.checked);
+                                
+                                let votesSummary = `<ul class="text-sm text-gray-600 mt-2 list-none text-left">`;
+                                for (const voterId in votes) {
+                                    votesSummary += `<li><b>玩家 ${voterId}</b> 投给了 <b>玩家 ${votes[voterId]}</b></li>`;
+                                }
+                                votesSummary += '</ul>';
+                                addInfoToDiscussion(`玩家 <b>${eliminated_player_name}</b> 被投票出局! ${votesSummary}`, 'elimination');
+                                break;
+                            }
+                            case 'tie_vote':
+                                currentPhase.textContent = '平票，无人出局，游戏继续！';
+                                addInfoToDiscussion(data.message, 'tie');
+                                break;
+                            case 'end': {
+                                const { winner, result_message, votes, players } = data;
+                                currentPhase.textContent = '游戏结束';
+                                resultTitle.textContent = `${winner} 胜利!`;
+                                
+                                let votesSummary = '<div class="mt-6 pt-4 border-t border-white/20 text-left"><h4 class="font-bold text-lg mb-2">最后一轮投票详情:</h4><ul class="list-disc list-inside opacity-90">';
+                                for (const voterId in votes) {
+                                    votesSummary += `<li><b>AI玩家 ${voterId}</b> 投给了 <b>AI玩家 ${votes[voterId]}</b></li>`;
+                                }
+                                votesSummary += '</ul></div>';
+                                
+                                resultMessage.innerHTML = result_message + votesSummary;
+                                resultContainer.classList.remove('hidden');
+                                resultContainer.scrollIntoView({ behavior: 'smooth' });
+
+                                // 游戏结束，总是显示所有人的身份
+                                renderPlayers(players, true); 
+                                
+                                startGameBtn.disabled = false;
+                                startGameBtn.innerHTML = '<i class="fas fa-redo mr-2"></i>再来一局';
+                                break;
+                            }
+                        }
+                    }
+                }
+            } catch (error) {
+                console.error("游戏运行失败:", error);
+                currentPhase.textContent = '游戏出错了，请检查后台服务或网络。';
+                discussionPlaceholder.classList.remove('hidden');
+                startGameBtn.disabled = false;
+                startGameBtn.innerHTML = '<i class="fas fa-play mr-2"></i>重新开始';
+            }
+        }
+
+        startGameBtn.addEventListener('click', handleStartGame);
+    </script>
+</body>
+</html>
