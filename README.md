@@ -1,0 +1,2 @@
+# who_is_the_spy_multiagent
+一个多智能体自动进行谁是卧底游戏的程序
