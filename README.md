@@ -69,4 +69,4 @@ python app.py
 
 ## 四、 前端示例
 
-![演示](sample_pic\\sample_1.png)
+![演示](/sample_pic/sample_1.png)
