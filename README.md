@@ -31,15 +31,17 @@ pip install -r requirements.txt
 
 #### 3. 配置 API 密钥
 
-a. 在项目根目录下，复制 `.env.example` 文件并重命名为 `.env`（或 `api_env.env`，根据你的偏好）。
+a. 本项目选择调用字节跳动[火山引擎](https://www.volcengine.com/)中的[豆包大模型](https://www.volcengine.com/product/doubao)，请使用者自行前往火山引擎生成自己的 API 密钥，笔者此处不再赘述。
 
-b. 在新建的 `.env` 文件中，添加你的 API 密钥，格式如下：
+b. 在项目根目录下，复制 `.env.example` 文件并重命名为 `.env`（或 `api_env.env`，根据你的偏好）。
+
+c. 在新建的 `.env` 文件中，添加你的 API 密钥，格式如下：
 
    ```
    ARK_API_KEY="YOUR_API_KEY_HERE"
    ```
 
-c. **（重要！）** 为了防止密钥泄露，请务必在 `.gitignore` 文件中添加 `.env` (或 `api_env.env`)，确保该文件不会被上传到 Git 仓库。
+d. **（重要！）** 为了防止密钥泄露，请务必在 `.gitignore` 文件中添加 `.env` (或 `api_env.env`)，确保该文件不会被上传到 Git 仓库。
 
 #### 4. 启动后端服务
 
