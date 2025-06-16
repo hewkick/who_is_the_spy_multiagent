@@ -52,7 +52,7 @@
             <h1 class="text-4xl md:text-5xl font-extrabold text-gray-900 mb-2">
                 <i class="fas fa-user-secret mr-3 text-blue-600"></i>谁是卧底 <span class="text-blue-600">(AI对战)</span>
             </h1>
-            <p class="text-gray-600 text-lg">观察四个AI智能体进行一场动态淘汰的卧底游戏</p>
+            <p class="text-gray-600 text-lg">观察AI智能体进行一场动态淘汰的卧底游戏</p>
         </header>
 
         <!-- 游戏控制区域 -->
@@ -61,10 +61,25 @@
                 <button id="start-game-btn" class="btn btn-primary w-full sm:w-auto text-lg">
                     <i class="fas fa-play mr-2"></i>开始游戏
                 </button>
-                <!-- 添加上帝视角复选框 -->
                 <div class="flex items-center">
                     <input type="checkbox" id="god-mode-checkbox" class="h-5 w-5 rounded border-gray-300 text-blue-600 focus:ring-blue-500">
                     <label for="god-mode-checkbox" class="ml-2 text-md font-medium text-gray-700">开启上帝视角</label>
+                </div>
+            </div>
+            <!-- Game Configuration Options -->
+            <div id="game-config" class="w-full mt-6 pt-6 border-t border-gray-200 flex flex-col sm:flex-row justify-center items-center space-y-4 sm:space-y-0 sm:space-x-8">
+                <div class="flex items-center space-x-2">
+                    <label for="total-players" class="text-md font-medium text-gray-700">总人数:</label>
+                    <input type="number" id="total-players" name="total-players" value="4" min="3" max="10" class="w-20 rounded border-gray-300 text-center focus:ring-blue-500 focus:border-blue-500">
+                </div>
+                <div class="flex items-center space-x-2">
+                    <label for="num-undercover" class="text-md font-medium text-gray-700">卧底人数:</label>
+                    <input type="number" id="num-undercover" name="num-undercover" value="1" min="1" max="3" class="w-20 rounded border-gray-300 text-center focus:ring-blue-500 focus:border-blue-500">
+                </div>
+                <div class="flex items-center space-x-2">
+                    <label for="max-rounds" class="text-md font-medium text-gray-700">最大回合:</label>
+                    <input type="number" id="max-rounds" name="max-rounds" value="5" min="0" max="10" class="w-20 rounded border-gray-300 text-center focus:ring-blue-500 focus:border-blue-500">
+                    <span class="text-sm text-gray-500">(0为无限制)</span>
                 </div>
             </div>
         </div>
@@ -74,28 +89,35 @@
             <p id="current-phase">等待开始...</p>
         </div>
 
-        <!-- 玩家信息展示区 -->
-        <div class="mb-8 animate-fade-in" style="animation-delay: 300ms;">
-            <h2 class="text-2xl font-bold text-gray-800 mb-4 flex items-center">
-                <i class="fas fa-users mr-3 text-gray-500"></i>游戏玩家
-            </h2>
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4" id="players-container">
-                <div class="player-card border-gray-200"><div class="h-24 flex items-center justify-center text-gray-400">玩家 1</div></div>
-                <div class="player-card border-gray-200"><div class="h-24 flex items-center justify-center text-gray-400">玩家 2</div></div>
-                <div class="player-card border-gray-200"><div class="h-24 flex items-center justify-center text-gray-400">玩家 3</div></div>
-                <div class="player-card border-gray-200"><div class="h-24 flex items-center justify-center text-gray-400">玩家 4</div></div>
+        <!-- NEW: Main Layout Grid -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 lg:gap-8">
+            
+            <!-- Left Column: Players -->
+            <div class="lg:col-span-1">
+                <!-- 玩家信息展示区 -->
+                <div class="mb-8 animate-fade-in" style="animation-delay: 300ms;">
+                    <h2 class="text-2xl font-bold text-gray-800 mb-4 flex items-center">
+                        <i class="fas fa-users mr-3 text-gray-500"></i>游戏玩家
+                    </h2>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-1 gap-4" id="players-container">
+                         <div class="player-card border-gray-200 col-span-full"><div class="h-24 flex items-center justify-center text-gray-400">配置游戏并点击“开始游戏”</div></div>
+                    </div>
+                </div>
             </div>
-        </div>
 
-        <!-- 对话展示区 -->
-        <div class="mb-8 animate-fade-in" style="animation-delay: 400ms;">
-            <h2 class="text-2xl font-bold text-gray-800 mb-4 flex items-center">
-                <i class="fas fa-comments mr-3 text-gray-500"></i>讨论与投票
-            </h2>
-            <div class="bg-white rounded-xl shadow-lg p-4 h-[42rem] overflow-y-auto" id="discussion-container">
-                <div class="text-center text-gray-500 pt-16" id="discussion-placeholder">
-                    <i class="fas fa-hourglass-start fa-2x mb-4"></i>
-                    <p>游戏尚未开始...</p>
+            <!-- Right Column: Discussion -->
+            <div class="lg:col-span-2">
+                <!-- 对话展示区 -->
+                <div class="mb-8 animate-fade-in" style="animation-delay: 400ms;">
+                    <h2 class="text-2xl font-bold text-gray-800 mb-4 flex items-center">
+                        <i class="fas fa-comments mr-3 text-gray-500"></i>讨论与投票
+                    </h2>
+                    <div class="bg-white rounded-xl shadow-lg p-4 h-[48rem] overflow-y-auto" id="discussion-container">
+                        <div class="text-center text-gray-500 pt-16" id="discussion-placeholder">
+                            <i class="fas fa-hourglass-start fa-2x mb-4"></i>
+                            <p>游戏尚未开始...</p>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -121,9 +143,24 @@
         const resultTitle = document.getElementById('result-title');
         const resultMessage = document.getElementById('result-message');
         
-        let allPlayersData = [];
+        const totalPlayersInput = document.getElementById('total-players');
+        const numUndercoverInput = document.getElementById('num-undercover');
+        const maxRoundsInput = document.getElementById('max-rounds');
 
-        // 恢复深度思考内容的切换功能
+        let allPlayersData = [];
+        
+        function updateUndercoverMax() {
+            const totalPlayers = parseInt(totalPlayersInput.value, 10);
+            const maxUndercover = Math.max(1, Math.floor((totalPlayers-1) / 2));
+            numUndercoverInput.max = maxUndercover;
+            if (parseInt(numUndercoverInput.value, 10) > maxUndercover) {
+                numUndercoverInput.value = maxUndercover;
+            }
+        }
+        totalPlayersInput.addEventListener('input', updateUndercoverMax);
+        document.addEventListener('DOMContentLoaded', updateUndercoverMax);
+
+
         function toggleReasoning(button) {
             const reasoningDiv = button.nextElementSibling;
             const icon = button.querySelector('i');
@@ -140,6 +177,16 @@
             if (allPlayersData.length === 0) allPlayersData = players;
             
             playersContainer.innerHTML = '';
+            
+            // Adjust grid columns for player cards inside the left column
+            const playerCount = allPlayersData.length;
+            if (playerCount <= 5) {
+                playersContainer.className = 'grid grid-cols-1 gap-4';
+            } else if (playerCount <= 10) {
+                 playersContainer.className = 'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 gap-4';
+            }
+
+
             allPlayersData.forEach(player => {
                 const card = document.createElement('div');
                 card.id = `player-card-${player.id}`;
@@ -150,7 +197,6 @@
                 }
 
                 let roleInfo = '';
-                // 根据传入的参数决定是否显示身份
                 if (showRoles) {
                     const roleClass = player.isUndercover ? 'text-red-600' : 'text-green-600';
                     const roleIcon = player.isUndercover ? 'fa-user-secret' : 'fa-user';
@@ -206,14 +252,30 @@
             discussionContainer.innerHTML = '';
             discussionPlaceholder.classList.add('hidden');
             resultContainer.classList.add('hidden');
+            allPlayersData = []; // Reset player data
             
             let currentMessageDiv, currentContentP, currentReasoningDiv;
+
+            const total_players = parseInt(totalPlayersInput.value, 10);
+            const num_undercover = parseInt(numUndercoverInput.value, 10);
+            const max_rounds = parseInt(maxRoundsInput.value, 10);
+            
+            if (num_undercover >= total_players) {
+                alert("卧底人数必须小于总人数！");
+                startGameBtn.disabled = false;
+                startGameBtn.innerHTML = '<i class="fas fa-play mr-2"></i>重新开始';
+                return;
+            }
 
             try {
                 const response = await fetch('/run_game', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({}) 
+                    body: JSON.stringify({ 
+                        total_players, 
+                        num_undercover, 
+                        max_rounds 
+                    }) 
                 });
 
                 if (!response.body) throw new Error("流式响应体不存在");
@@ -232,12 +294,15 @@
                         switch (data.type) {
                             case 'start':
                                 allPlayersData = data.players;
-                                // 根据上帝视角复选框的状态来渲染玩家
                                 renderPlayers(allPlayersData, godModeCheckbox.checked); 
                                 currentPhase.textContent = '游戏开始!';
                                 break;
                             case 'round_start':
-                                currentPhase.textContent = `第 ${data.round} 轮 - 发言阶段`;
+                                let roundText = `第 ${data.round} 轮 - 发言阶段`;
+                                if (data.max_rounds > 0) {
+                                    roundText += ` (共 ${data.max_rounds} 轮)`;
+                                }
+                                currentPhase.textContent = roundText;
                                 addInfoToDiscussion(`--- 第 ${data.round} 轮开始 ---`, 'round');
                                 break;
                             case 'voting_phase_start':
@@ -247,7 +312,6 @@
                             case 'message_start':
                                 currentMessageDiv = document.createElement('div');
                                 currentMessageDiv.className = 'discussion-bubble mb-4 p-4 rounded-lg bg-blue-50';
-                                // 恢复带有深度思考内容的话题气泡结构
                                 currentMessageDiv.innerHTML = `
                                     <div class="flex items-start">
                                         <div class="w-10 h-10 rounded-full bg-blue-100 flex-shrink-0 flex items-center justify-center text-blue-600 font-bold mr-4">${data.playerId}</div>
@@ -268,7 +332,6 @@
                                 if (currentContentP) currentContentP.textContent += data.content;
                                 discussionContainer.scrollTop = discussionContainer.scrollHeight;
                                 break;
-                            // 添加对 reasoning_chunk 的处理
                             case 'reasoning_chunk':
                                 if (currentReasoningDiv) {
                                     currentReasoningDiv.previousElementSibling.classList.remove('hidden'); // 显示按钮
@@ -285,7 +348,6 @@
                                 currentPhase.textContent = `玩家 ${eliminated_player_name} 被投票出局！`;
                                 const playerToUpdate = allPlayersData.find(p => p.id === eliminated_player_id);
                                 if(playerToUpdate) playerToUpdate.active = false;
-                                // 根据上帝模式决定是否在淘汰后立刻揭示身份
                                 renderPlayers(allPlayersData, godModeCheckbox.checked);
                                 
                                 let votesSummary = `<ul class="text-sm text-gray-600 mt-2 list-none text-left">`;
@@ -306,8 +368,12 @@
                                 resultTitle.textContent = `${winner} 胜利!`;
                                 
                                 let votesSummary = '<div class="mt-6 pt-4 border-t border-white/20 text-left"><h4 class="font-bold text-lg mb-2">最后一轮投票详情:</h4><ul class="list-disc list-inside opacity-90">';
-                                for (const voterId in votes) {
-                                    votesSummary += `<li><b>AI玩家 ${voterId}</b> 投给了 <b>AI玩家 ${votes[voterId]}</b></li>`;
+                                if (votes && Object.keys(votes).length > 0) {
+                                    for (const voterId in votes) {
+                                        votesSummary += `<li><b>AI玩家 ${voterId}</b> 投给了 <b>AI玩家 ${votes[voterId]}</b></li>`;
+                                    }
+                                } else {
+                                    votesSummary += '<li>没有进行最后一轮投票。</li>';
                                 }
                                 votesSummary += '</ul></div>';
                                 
@@ -315,7 +381,6 @@
                                 resultContainer.classList.remove('hidden');
                                 resultContainer.scrollIntoView({ behavior: 'smooth' });
 
-                                // 游戏结束，总是显示所有人的身份
                                 renderPlayers(players, true); 
                                 
                                 startGameBtn.disabled = false;
