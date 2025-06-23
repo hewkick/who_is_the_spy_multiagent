@@ -1,0 +1,23 @@
+{
+  "name": "who-is-the-spy-nodejs",
+  "version": "1.0.0",
+  "description": "一个基于大语言模型的多智能体“谁是卧底”游戏模拟程序 (Node.js版)",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "multi-agent",
+    "llm",
+    "game",
+    "nodejs"
+  ],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "dotenv": "^16.4.5",
+    "express": "^4.19.2",
+    "openai": "^4.47.1"
+  }
+}
